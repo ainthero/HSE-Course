@@ -48,31 +48,20 @@ BigInteger::BigInteger(int number) {
     }
 }
 
-BigInteger::BigInteger(std::string const &number) {
-    std::string tmp;
-    for (auto ptr = number.rbegin(); ptr != number.rend(); ptr++) {
-        tmp.push_back(*ptr);
-    }
-    if (tmp.back() == '-') {
-        tmp.pop_back();
+BigInteger::BigInteger(std::string number) {
+    if (number.front() == '-') {
         sign = -1;
+        number.erase(number.begin());
     } else {
         sign = 1;
     }
-    while (tmp.back() == '0') {
-        tmp.pop_back();
-    }
-    if (tmp.empty()) {
-        _data.push_back(0);
-        return;
-    }
-    while (!tmp.empty()) {
-        std::string base_num;
-        for (int i = 0; i < 9 && !tmp.empty(); i++){
-            base_num.push_back(tmp.back());
-            tmp.pop_back();
-        }
-        _data.push_back(std::stoi(base_num));
+    for (int i = number.length(); i > 0; i -= 9)
+        if (i < 9)
+            _data.push_back(std::stoi(number.substr(0, i)));
+        else
+            _data.push_back(std::stoi(number.substr(i - 9, 9)));
+    while (_data.size() > 1 && _data.back() == 0) {
+        _data.pop_back();
     }
 }
 
@@ -265,21 +254,17 @@ bool BigInteger::operator<=(const BigInteger &number) const {
 }
 
 std::string BigInteger::toString() const {
-    std::string reversed_ans;
-    for (auto number : _data) {
-        int temp_base = base;
-        while (temp_base > 1) {
-            reversed_ans.push_back(char(number % 10) + '0');
-            number /= 10;
-            temp_base /= 10;
+    std::string ans;
+    if (sign == -1) ans.push_back('-');
+    if (!_data.empty()) ans += std::to_string(_data.back());
+    for (int i = (int) _data.size() - 2; i >= 0; i--) {
+        int tmp_base = base;
+        while (tmp_base > 1) {
+            ans.push_back('0' + (_data[i] / (tmp_base / 10) % 10));
+            tmp_base /= 10;
         }
     }
-    std::string ans;
-    while (reversed_ans.back() == '0') reversed_ans.pop_back();
-    if (sign == -1) reversed_ans.push_back('-');
-    for (auto number_ptr = reversed_ans.rbegin(); number_ptr != reversed_ans.rend(); number_ptr++)
-        ans.push_back(*number_ptr);
-    return ans.empty() ? std::string("0") : ans;
+    return ans;
 }
 
 BigInteger::operator bool() const {
