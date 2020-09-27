@@ -23,7 +23,7 @@ public:
 
     BigInteger(int number);
 
-    BigInteger(std::string const &number);
+    BigInteger(std::string number);
 
     BigInteger(BigInteger const &number);
 
