@@ -81,6 +81,12 @@ BigInteger BigInteger::operator-() {
 }
 
 BigInteger BigInteger::operator+(const BigInteger &number) const {
+    BigInteger res = *this;
+    return res += number;
+
+}
+
+BigInteger &BigInteger::operator+=(const BigInteger &number) {
     BigInteger res;
     int digit = 0;
     if (sign == number.sign) {
@@ -90,7 +96,7 @@ BigInteger BigInteger::operator+(const BigInteger &number) const {
             digit = (_at(i) + number._at(i) + digit) / base;
         }
         if (digit) res._data.push_back(digit);
-        return res;
+        return *this = res;
     } else {
         BigInteger nosign_number1 = *this;
         nosign_number1.sign = 1;
@@ -98,35 +104,29 @@ BigInteger BigInteger::operator+(const BigInteger &number) const {
         nosign_number2.sign = 1;
         if (sign == 1) {
             if (nosign_number1 >= nosign_number2) {
-                return sub(nosign_number1, nosign_number2, 1);
+                return *this = sub(nosign_number1, nosign_number2, 1);
             } else {
-                return sub(nosign_number2, nosign_number1, -1);
+                return *this = sub(nosign_number2, nosign_number1, -1);
             }
         } else {
             if (nosign_number1 >= nosign_number2) {
-                return sub(nosign_number1, nosign_number2, -1);
+                return *this = sub(nosign_number1, nosign_number2, -1);
             } else {
-                return sub(nosign_number2, nosign_number1, 1);
+                return *this = sub(nosign_number2, nosign_number1, 1);
             }
         }
     }
 }
 
-BigInteger &BigInteger::operator+=(const BigInteger &number) {
-    *this = *this + number;
-    return *this;
-}
-
 BigInteger &BigInteger::operator-=(const BigInteger &number) {
-    *this = *this - number;
-    return *this;
+    BigInteger revsign_number = number;
+    revsign_number.sign += number.sign * (-2);
+    return *this += revsign_number;
 }
 
 BigInteger BigInteger::operator-(const BigInteger &number) const {
-    BigInteger res;
-    BigInteger revsign_number = number;
-    revsign_number.sign += number.sign * (-2);
-    return *this + revsign_number;
+    BigInteger res = *this;
+    return res -= number;
 }
 
 BigInteger BigInteger::operator*(int number) const {
@@ -268,7 +268,7 @@ std::string BigInteger::toString() const {
 }
 
 BigInteger::operator bool() const {
-    return *this != BigInteger(0);
+    return !(_data.size() == 1 && _at(0) == 0);
 }
 
 std::ostream &operator<<(std::ostream &out, const BigInteger &number) {
